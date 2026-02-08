@@ -1,0 +1,46 @@
+server:
+  port: 8080
+
+spring:
+  main:
+    web-application-type: reactive
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+#      routes:
+#        - id: user
+#          uri: lb://USER
+#          predicates:
+#            - Path=/api/users/**
+#
+#        - id: product
+#          uri: lb://PRODUCT
+#          predicates:
+#            - Path=/api/products/**
+#
+#        - id: order
+#          uri: lb://ORDER
+#          predicates:
+#            - Path=/api/order/**, /api/cart-items/**
+#
+#        - id: eureka-server
+#          uri: http://localhost:8761
+#          predicates:
+#            - Path=/eureka-server/**
+#          filters:
+#            - SetPath=/
+#
+#        - id: eureka-server-static
+#          uri: http://localhost:8761
+#          predicates:
+#            - Path=/eureka/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
