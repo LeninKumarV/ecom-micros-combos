@@ -3,5 +3,14 @@ spring:
   application:
     name: apiGateway
 
+  ## keycloak -resource server
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://127.0.0.1:8765/realms/ecom-oauth2
+          jwk-set-uri: http://127.0.0.1:8765/realms/ecom-oauth2/protocol/openid-connect/certs
+
+
   config:
     import: optional:configserver:http://localhost:8888
