@@ -58,9 +58,6 @@ public class ResourceServerConfig {
         return http.build();
     }
 
-    /**
-     * CRITICAL PART → Maps Keycloak roles → Spring roles
-     */
     @Bean
     public ReactiveJwtAuthenticationConverterAdapter jwtAuthenticationConverter() {
 
@@ -71,9 +68,6 @@ public class ResourceServerConfig {
         return new ReactiveJwtAuthenticationConverterAdapter(converter);
     }
 
-    /**
-     * Extract roles from Keycloak token
-     */
     private Collection<GrantedAuthority> extractRoles(Jwt jwt) {
 
         Set<String> roles = new HashSet<>();
