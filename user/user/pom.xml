@@ -102,6 +102,16 @@
             <artifactId>common-contracts</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-java</artifactId>
+            <version>3.14.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.konghq</groupId>
+            <artifactId>unirest-objectmapper-jackson</artifactId>
+            <version>3.14.5</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>

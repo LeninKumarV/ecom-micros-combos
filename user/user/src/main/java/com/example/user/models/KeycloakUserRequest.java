@@ -1,34 +1,22 @@
 package com.example.user.models;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
-import java.util.UUID;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-public class UserVo {
+public class KeycloakUserRequest {
 
-    private String userId;
-    private UUID keycloakId;
     private String username;
     private String firstName;
     private String lastName;
     private String email;
+    private Boolean enabled;
     private List<Credential> credentials;
-    private String phoneNumber;
-    private List<String> role;
-    private AddressVo address;
-    private String createdOn;
-    private String updatedOn;
-    private String response;
 
     @Data
+    @Builder
     public static class Credential {
         private String type;
         private String value;

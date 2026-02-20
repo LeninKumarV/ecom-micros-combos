@@ -42,3 +42,24 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+
+#keycloaak
+keycloak:
+  server-url: http://127.0.0.1:8443
+  realm: master
+
+  endpoints:
+    token: ${keycloak.server-url}/realms/master/protocol/openid-connect/token
+    users: ${keycloak.server-url}/admin/realms/${keycloak.realm}/users
+
+  admin:
+    client-id: ecom-app-client
+    client-secret: vLhakdaJNAikmRXu6NBJ1tEFTEflksAR
+    grant-type: password
+    username: admin_new
+    password: admin
+
+  connection:
+    connect-timeout: 5000
+    read-timeout: 5000

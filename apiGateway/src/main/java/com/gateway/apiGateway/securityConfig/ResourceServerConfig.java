@@ -1,5 +1,6 @@
 package com.gateway.apiGateway.securityConfig;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebFluxSecurity
+@Slf4j
 public class ResourceServerConfig {
 
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
@@ -87,6 +89,8 @@ public class ResourceServerConfig {
             });
         }
 
+        //information purpose only
+        log.info("Extracted roles {}", roles);
         return roles.stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                 .collect(Collectors.toSet());

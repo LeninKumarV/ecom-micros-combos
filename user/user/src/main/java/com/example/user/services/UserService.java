@@ -4,6 +4,7 @@ import com.example.user.entity.Address;
 import com.example.user.entity.User;
 import com.example.user.entity.UserRole;
 import com.example.user.models.AddressVo;
+import com.example.user.models.KeycloakUserRequest;
 import com.example.user.models.UserVo;
 import com.example.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,34 +14,42 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private final KeycloakAdminService  keycloakAdminService;
 
     public UserVo saveUser(UserVo userVo) {
 
-        Address address = null;
-        if (userVo.getAddress() != null) {
-            address = mapToAddressEntity(userVo.getAddress());
+        String response = keycloakAdminService.createUser(buildKeycloakUser(userVo));
+        if(response != null) {
+            Address address = null;
+            if (userVo.getAddress() != null) {
+                address = mapToAddressEntity(userVo.getAddress());
+            }
+
+            User user = User.builder()
+                    .keycloakId(UUID.fromString(response))
+                    .username(userVo.getUsername())
+                    .firstName(userVo.getFirstName())
+                    .lastName(userVo.getLastName())
+                    .email(userVo.getEmail())
+                    .phoneNumber(userVo.getPhoneNumber())
+                    .role(fromValue(userVo.getRole()))
+                    .address(address)
+                    .createdOn(LocalDateTime.now())
+                    .updatedOn(LocalDateTime.now())
+                    .build();
+
+            User savedUser = userRepository.save(user);
+
+            return mapToUserVo(savedUser, "User saved successfully!");
         }
-
-        User user = User.builder()
-                .firstName(userVo.getFirstName())
-                .lastName(userVo.getLastName())
-                .email(userVo.getEmail())
-                .phoneNumber(userVo.getPhoneNumber())
-                .role(fromValue(userVo.getRole()))
-                .address(address)
-                .createdOn(LocalDateTime.now())
-                .updatedOn(LocalDateTime.now())
-                .build();
-
-        User savedUser = userRepository.save(user);
-
-        return mapToUserVo(savedUser, "User saved successfully!");
+        return UserVo.builder().response("User doesn't created successfully.").build();
     }
 
     public List<UserVo> getAllUsers() {
@@ -58,6 +67,8 @@ public class UserService {
 
     private UserVo mapToUserVo(User user, String responseMessage) {
         return UserVo.builder()
+                .keycloakId(user.getKeycloakId())
+                .username(user.getUsername())
                 .userId(user.getUserId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
@@ -132,4 +143,24 @@ public class UserService {
                 : userRoles.stream().map(UserRole::name).toList();
     }
 
+    public KeycloakUserRequest buildKeycloakUser(UserVo userVo) {
+
+        return KeycloakUserRequest.builder()
+                .username(userVo.getUsername())
+                .firstName(userVo.getFirstName())
+                .lastName(userVo.getLastName())
+                .email(userVo.getEmail())
+                .enabled(true) // Always set explicitly
+                .credentials(
+                        userVo.getCredentials().stream()
+                                .map(c -> KeycloakUserRequest.Credential.builder()
+                                        .type(c.getType())          // password
+                                        .value(c.getValue())        // actual password
+                                        .temporary(c.getTemporary())
+                                        .build()
+                                )
+                                .toList()
+                )
+                .build();
+    }
 }

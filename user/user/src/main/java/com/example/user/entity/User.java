@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 
 @Document(collection = "users")
@@ -20,6 +21,8 @@ public class User {
 
     @MongoId
     private String userId;
+    private UUID keycloakId;
+    private String username;
     private String firstName;
     private String lastName;
     private String email;
