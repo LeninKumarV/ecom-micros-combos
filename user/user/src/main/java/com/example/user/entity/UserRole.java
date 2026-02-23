@@ -7,7 +7,9 @@ public enum UserRole {
 
     USER("user"),
     CUSTOMER("customer"),
-    ADMIN("admin");
+    ADMIN("admin"),
+    ORDER("order"),
+    PRODUCT("product");
 
     private final String value;
 

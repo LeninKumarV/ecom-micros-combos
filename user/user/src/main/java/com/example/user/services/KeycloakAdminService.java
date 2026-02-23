@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -48,6 +51,47 @@ public class KeycloakAdminService {
 
         return keycloakUserId;
     }
+
+    public int assignRealmRoles(String userId, List<String> roleNames) {
+
+        String token = tokenService.getAdminAccessToken();
+
+        List<String> roleJsonList = new ArrayList<>();
+
+        for (String roleName : roleNames) {
+
+            HttpResponse<JsonNode> roleResponse = Unirest.get(
+                            properties.getServerUrl() + "/admin/realms/" + properties.getRealm() + "/roles/" + roleName)
+                    .header("Authorization", "Bearer " + token)
+                    .asJson();
+
+            if (roleResponse.getStatus() != 200) {
+                throw new RuntimeException("Role not found: " + roleName);
+            }
+
+            String roleId = roleResponse.getBody().getObject().getString("id");
+
+            roleJsonList.add(
+                    String.format("{\"id\":\"%s\",\"name\":\"%s\"}", roleId, roleName)
+            );
+        }
+
+        String body = "[" + String.join(",", roleJsonList) + "]";
+
+        HttpResponse<String> response = Unirest.post(
+                        properties.getServerUrl() + "/admin/realms/" + properties.getRealm()
+                                + "/users/" + userId + "/role-mappings/realm")
+                .header("Authorization", "Bearer " + token)
+                .header("Content-Type", "application/json")
+                .body(body)
+                .asString();
+
+        if (response.getStatus() != 204) {
+            throw new RuntimeException("Role assignment failed: " + response.getBody());
+        }
+        return response.getStatus();
+    }
+
 
     private String extractKeycloakError(HttpResponse<String> response) {
 

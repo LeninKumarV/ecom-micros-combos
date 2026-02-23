@@ -8,6 +8,7 @@ import com.example.user.models.KeycloakUserRequest;
 import com.example.user.models.UserVo;
 import com.example.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -27,27 +29,32 @@ public class UserService {
 
         String response = keycloakAdminService.createUser(buildKeycloakUser(userVo));
         if(response != null) {
-            Address address = null;
-            if (userVo.getAddress() != null) {
-                address = mapToAddressEntity(userVo.getAddress());
+            int assignRoles = keycloakAdminService.assignRealmRoles(response, userVo.getRole());
+
+            log.info("Assigned realm roles response: {}", assignRoles);
+            if(assignRoles == 204) {
+                Address address = null;
+                if (userVo.getAddress() != null) {
+                    address = mapToAddressEntity(userVo.getAddress());
+                }
+
+                User user = User.builder()
+                        .keycloakId(UUID.fromString(response))
+                        .username(userVo.getUsername())
+                        .firstName(userVo.getFirstName())
+                        .lastName(userVo.getLastName())
+                        .email(userVo.getEmail())
+                        .phoneNumber(userVo.getPhoneNumber())
+                        .role(fromValue(userVo.getRole()))
+                        .address(address)
+                        .createdOn(LocalDateTime.now())
+                        .updatedOn(LocalDateTime.now())
+                        .build();
+
+                User savedUser = userRepository.save(user);
+
+                return mapToUserVo(savedUser, "User saved successfully!");
             }
-
-            User user = User.builder()
-                    .keycloakId(UUID.fromString(response))
-                    .username(userVo.getUsername())
-                    .firstName(userVo.getFirstName())
-                    .lastName(userVo.getLastName())
-                    .email(userVo.getEmail())
-                    .phoneNumber(userVo.getPhoneNumber())
-                    .role(fromValue(userVo.getRole()))
-                    .address(address)
-                    .createdOn(LocalDateTime.now())
-                    .updatedOn(LocalDateTime.now())
-                    .build();
-
-            User savedUser = userRepository.save(user);
-
-            return mapToUserVo(savedUser, "User saved successfully!");
         }
         return UserVo.builder().response("User doesn't created successfully.").build();
     }
